@@ -1,0 +1,44 @@
+{
+  "configurations": [
+    {
+      "inheritEnvironments": [
+        "msvc_x64_x64"
+      ],
+      "name": "x64-Debug",
+      "includePath": [
+        "${env.INCLUDE}",
+        "${projectRoot}",
+        "${projectRoot}/src",
+        "${projectRoot}/src/lib/box2d/include",
+        "C:/raylib/raylib/src",
+        "C:/raylib/raylib/src/external",
+        "C:/raylib/raylib/src/external/glfw/include"
+      ],
+      "defines": [
+        "PLATFORM_DESKTOP",
+        "_DEBUG"
+      ],
+      "intelliSenseMode": "windows-msvc-x64"
+    },
+    {
+      "inheritEnvironments": [
+        "msvc_x64_x64"
+      ],
+      "name": "x64-Release",
+      "includePath": [
+        "${env.INCLUDE}",
+        "${projectRoot}",
+        "${projectRoot}/src",
+        "${projectRoot}/src/lib/box2d/include",
+        "C:/raylib/raylib/src",
+        "C:/raylib/raylib/src/external",
+        "C:/raylib/raylib/src/external/glfw/include"
+      ],
+      "defines": [
+        "PLATFORM_DESKTOP",
+        "NDEBUG"
+      ],
+      "intelliSenseMode": "windows-msvc-x64"
+    }
+  ]
+}
