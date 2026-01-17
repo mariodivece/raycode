@@ -7,6 +7,8 @@
 
 class Ball;
 class Wall;
+class Hud;
+class FakeLight;
 
 class Game {
 public:
@@ -30,6 +32,7 @@ public:
     void ProcessInput();
     
     b2WorldId GetWorldId() const { return worldId; }
+    FakeLight* GetLight() const { return light.get(); }
     
     // Box2D works best with meter-based units (0.1 to 10 meters)
     // Scale factor: 1 meter = 50 pixels
@@ -46,6 +49,8 @@ private:
     std::unique_ptr<Ball> player;
     std::vector<std::unique_ptr<Ball>> enemies;
     std::vector<std::unique_ptr<Wall>> walls;
+    std::unique_ptr<Hud> hud;
+    std::unique_ptr<FakeLight> light;
     
     void CreateWorldBounds();
 };

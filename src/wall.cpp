@@ -58,10 +58,23 @@ void Wall::CheckForBreaks() {
                 // Change brick to dynamic body
                 b2Body_SetType(brick->GetBodyId(), b2_dynamicBody);
                 
-                // Apply impulse based on impact direction
+                // Determine which body hit the brick and get its velocity
+                b2BodyId otherBodyId;
+                if (B2_ID_EQUALS(hit.shapeIdA, brickShapeId)) {
+                    // Brick is A, other object is B
+                    otherBodyId = b2Shape_GetBody(hit.shapeIdB);
+                } else {
+                    // Brick is B, other object is A
+                    otherBodyId = b2Shape_GetBody(hit.shapeIdA);
+                }
+                
+                // Get the velocity of the impacting body
+                b2Vec2 impactVelocity = b2Body_GetLinearVelocity(otherBodyId);
+                
+                // Apply impulse in the direction of impact with reduced magnitude
                 b2Vec2 impulse = {
-                    hit.normal.x * 1.0f,
-                    hit.normal.y * 1.0f
+                    impactVelocity.x * 0.3f,
+                    impactVelocity.y * 0.3f
                 };
                 b2Body_ApplyLinearImpulseToCenter(brick->GetBodyId(), impulse, true);
                 

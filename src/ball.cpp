@@ -1,9 +1,11 @@
 #include "ball.h"
 #include "game.h"
+#include "FakeLight.h"
 #include <raylib.h>
+#include <raymath.h>
 
 Ball::Ball(Game* game, bool autoBounce)
-    : game(game)
+    : IPhysicsBody(game)
     , radius(15)
     , color(WHITE)
     , isPlayer(!autoBounce)
@@ -39,7 +41,7 @@ Ball::Ball(Game* game, bool autoBounce)
 }
 
 Ball::Ball(Game* game, float x, float y, Color color, bool autoBounce)
-    : game(game)
+    : IPhysicsBody(game)
     , radius(15)
     , color(color)
     , isPlayer(!autoBounce)
@@ -80,7 +82,45 @@ void Ball::Update() {
 void Ball::Render() const {
     // Get position from Box2D body (convert meters to pixels)
     b2Vec2 pos = b2Body_GetPosition(bodyId);
-    DrawCircleV(Vector2{ pos.x * Game::PIXELS_PER_METER, pos.y * Game::PIXELS_PER_METER }, radius, color);
+    Vector2 position = { pos.x * Game::PIXELS_PER_METER, pos.y * Game::PIXELS_PER_METER };
+    
+    // Get light intensity at this position
+    FakeLight* light = game->GetLight();
+    float intensity = light ? light->GetIntensityAt(position) : 1.0f;
+    
+    // Apply intensity to base color (darker when further from light)
+    Color litColor = ColorBrightness(color, (intensity - 1.0f) * 0.5f);
+    Color edgeColor = ColorBrightness(litColor, -0.3f);  // Darker at edges
+    
+    // Calculate highlight offset based on light direction  
+    Vector2 gradientCenter = position;
+    if (light) {
+        Vector2 highlightOffset = light->GetHighlightOffset(position, radius);
+        // Invert the offset so bright spot faces the light
+        gradientCenter.x = position.x - highlightOffset.x;
+        gradientCenter.y = position.y - highlightOffset.y;
+    }
+    
+    // Draw smooth gradient from bright center to darker edge
+    Color centerColor = ColorBrightness(litColor, 0.4f);  // Brighter at highlight
+    DrawCircleGradient(
+        (int)gradientCenter.x,
+        (int)gradientCenter.y,
+        radius,
+        centerColor,
+        edgeColor
+    );
+    
+    // Add subtle specular highlight for extra shine
+    if (light) {
+        Vector2 highlightOffset = light->GetHighlightOffset(position, radius);
+        Vector2 specularPos = {
+            position.x + highlightOffset.x * 0.6f,
+            position.y + highlightOffset.y * 0.6f
+        };
+        float specularRadius = radius * 0.2f;
+        DrawCircleV(specularPos, specularRadius, ColorAlpha(WHITE, 0.4f));
+    }
 }
 
 void Ball::ApplyForce(float x, float y) {

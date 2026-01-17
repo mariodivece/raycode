@@ -3,16 +3,17 @@
 #include <vector>
 #include <memory>
 #include "brick.h"
+#include "IRenderable.h"
 
 class Game;
 
-class Wall {
+class Wall : public IRenderable {
 public:
     Wall(Game* game, float startX, float startY, int brickCount, bool horizontal, Color color);
-    ~Wall() = default;
+    ~Wall() override = default;
 
     void Update();
-    void Render() const;
+    void Render() const override;
     void CheckForBreaks();  // Check if any bricks should detach
 
 private:

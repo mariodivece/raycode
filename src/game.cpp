@@ -1,7 +1,10 @@
 #include "game.h"
 #include "ball.h"
 #include "wall.h"
+#include "hud.h"
+#include "FakeLight.h"
 #include <raylib.h>
+#include <cmath>
 
 Game::Game() {
     running = true;
@@ -37,6 +40,13 @@ Game::Game() {
     
     // Vertical wall in middle-right area
     walls.push_back(std::make_unique<Wall>(this, 600.0f, 250.0f, wall2Length, false, GRAY));
+    
+    // Create HUD
+    hud = std::make_unique<Hud>(this);
+    
+    // Create point light at center of screen
+    Vector2 lightPos = { screenWidth / 2.0f, screenHeight / 2.0f };
+    light = std::make_unique<FakeLight>(lightPos, LightType::Point);
 }
 
 void Game::CreateWorldBounds() {
@@ -102,7 +112,36 @@ void Game::Update() {
 
 void Game::Render() {
     BeginDrawing();
-    ClearBackground(GetBackgroundColor());
+    
+    // Draw radial gradient background based on light position
+    if (light && light->GetType() == LightType::Point) {
+        Vector2 lightPos = light->GetPosition();
+        Color baseColor = GetBackgroundColor();
+        Color centerColor = ColorBrightness(baseColor, 0.3f);  // 30% brighter at center
+        Color edgeColor = ColorBrightness(baseColor, -0.4f);   // 40% darker at edges
+        
+        // Draw gradient using concentric circles
+        float maxRadius = sqrtf(screenWidth * screenWidth + screenHeight * screenHeight) / 2.0f;
+        int steps = 50;  // Number of gradient steps
+        
+        for (int i = steps; i >= 0; i--) {
+            float t = (float)i / steps;  // t=1.0 at outer edge, t=0.0 at center
+            float radius = maxRadius * t;
+            
+            // Interpolate from center (bright) to edge (dark)
+            // When t=0 (center), use centerColor. When t=1 (edge), use edgeColor
+            Color stepColor = {
+                (unsigned char)(centerColor.r + (edgeColor.r - centerColor.r) * t),
+                (unsigned char)(centerColor.g + (edgeColor.g - centerColor.g) * t),
+                (unsigned char)(centerColor.b + (edgeColor.b - centerColor.b) * t),
+                255
+            };
+            
+            DrawCircleV(lightPos, radius, stepColor);
+        }
+    } else {
+        ClearBackground(GetBackgroundColor());
+    }
     
     for (auto& enemy : enemies) {
         if (enemy) enemy->Render();
@@ -115,9 +154,8 @@ void Game::Render() {
     
     if (player) player->Render();
     
-    // Debug info
-    b2Counters counters = b2World_GetCounters(worldId);
-    DrawText(TextFormat("Bodies: %d, Contacts: %d", counters.bodyCount, counters.contactCount), 10, 10, 20, WHITE);
+    // Render HUD
+    if (hud) hud->Render();
     
     EndDrawing();
 }

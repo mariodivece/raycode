@@ -38,7 +38,11 @@ endif()
 add_executable (raycode 
     "raycode.cpp" 
     "raycode.h" 
-    "game.h" 
+    "IRenderable.h"
+    "IPhysicsBody.h"
+    "FakeLight.h"
+    "FakeLight.cpp"
+    "game.h"
     "game.cpp" 
     "ball.h" 
     "ball.cpp"
@@ -46,6 +50,8 @@ add_executable (raycode
     "brick.cpp"
     "wall.h"
     "wall.cpp"
+    "hud.h"
+    "hud.cpp"
     ${RAYLIB_SOURCES}
 )
 

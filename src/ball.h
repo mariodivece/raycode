@@ -1,22 +1,22 @@
 #pragma once
 #include <raylib.h>
 #include <box2d/box2d.h>
+#include "IPhysicsBody.h"
+#include "IRenderable.h"
 
 class Game;
 
-class Ball {
+class Ball : public IPhysicsBody, public IRenderable {
 public:
     Ball(Game* game, bool autoBounce = true);
     Ball(Game* game, float x, float y, Color color, bool autoBounce = true);
-    ~Ball() = default;
+    ~Ball() override = default;
 
-    void Update();
-    void Render() const;
+    void Update() override;
+    void Render() const override;
     void ApplyForce(float x, float y);
 
 private:
-    Game* game;
-    b2BodyId bodyId;
     float radius;
     Color color;
     bool isPlayer;
